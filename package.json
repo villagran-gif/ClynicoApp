@@ -1,0 +1,12 @@
+{
+  "name": "clynicoapp",
+  "private": true,
+  "scripts": {
+    "build": "mkdir -p dist && cp -R public/* dist/",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "engines": { "node": ">=18" }
+}
