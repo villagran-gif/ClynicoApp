@@ -1,13 +1,51 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clynico - Seguimiento de Pacientes</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ClynicoApp</title>
+  <style>body{font-family:system-ui,Arial;margin:2rem;max-width:720px}</style>
+</head>
+<body>
+  <h1>Hola 👋 ClynicoApp</h1>
+  <p id="status">Cargando…</p>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
+
+    const firebaseConfig = {
+4 hours ago
+
+Update Firebase configuration in index.html
+      apiKey: "AIzaSyDXdCd8ARUOsIOL9PkGa11SiTVEXg0jvkc",
+      authDomain: "ClynicoApp.firebaseapp.com",
+      projectId: "clynicoapp",
+      storageBucket: "clynicoapp.firebasestorage.app",
+      messagingSenderId: "115064939897",
+      appId: "1:115064939897:web:ec3568a00b55cac1ffbba8"
+6 hours ago
+
+Update index.html
+    };
+    const app = initializeApp(firebaseConfig);
+
+    // App Check (Enterprise). En local puedes usar debug token (comentado)
+    // self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider("TU_RECAPTCHA_ENTERPRISE_SITE_KEY"),
+      isTokenAutoRefreshEnabled: true
+    });
+
+    // Demo de Auth + Firestore
+    await signInAnonymously(getAuth(app));
+    const db = getFirestore(app);
+    const ref = doc(db, "demos", "hello");
+    await setDoc(ref, { ok:true, ts: Date.now() });
+    const snap = await getDoc(ref);
+    document.getElementById("status").textContent = "Listo: " + JSON.stringify(snap.data());
+  </script>
+</body>
 </html>
