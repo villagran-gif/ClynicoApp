@@ -1,12 +1,19 @@
+// src/hooks/usePatients.ts
+'use client';
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import {
+  addDoc, collection, doc, onSnapshot, orderBy, query,
+  serverTimestamp, updateDoc, FirestoreError
+} from 'firebase/firestore';
+import { db } from '@/lib/firebase'; // <- usa tu ruta real
 import type { MessagingChannel, Patient, PatientMessage } from '../types';
 import { STAGES } from '../data/stages';
 
 interface UsePatientsResult {
   patients: Patient[];
   loading: boolean;
+  error: string | null;
   selectPatient: (patientId: string | null) => void;
   selectedPatient: Patient | null;
   messages: PatientMessage[];
@@ -22,63 +29,85 @@ export function usePatients(): UsePatientsResult {
   const [messages, setMessages] = useState<PatientMessage[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError]   = useState<string | null>(null);
 
+  // Lista de pacientes (tiempo real)
   useEffect(() => {
+    setLoading(true);
+    setError(null);
+
     const q = query(collection(db, PATIENTS_COLLECTION), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map((docSnapshot) => {
-        const data = docSnapshot.data();
-        const stageStatus = data.stageStatus ?? {};
-        STAGES.forEach((stage) => {
-          if (!(stage.id in stageStatus)) {
-            stageStatus[stage.id] = false;
-          }
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const docs = snapshot.docs.map((docSnapshot) => {
+          const data = docSnapshot.data() as any;
+          const stageStatus = { ...(data.stageStatus ?? {}) };
+          STAGES.forEach((stage) => {
+            if (!(stage.id in stageStatus)) stageStatus[stage.id] = false;
+          });
+
+          return {
+            id: docSnapshot.id,
+            name: data.name ?? 'Sin nombre',
+            contact: data.contact ?? 'Sin contacto',
+            preferredChannel: (data.preferredChannel ?? 'chat') as MessagingChannel,
+            stageStatus,
+            createdAt: data.createdAt?.toDate?.()?.toISOString?.() ?? null,
+            updatedAt: data.updatedAt?.toDate?.()?.toISOString?.() ?? null,
+          } satisfies Patient;
         });
-        return {
-          id: docSnapshot.id,
-          name: data.name ?? 'Sin nombre',
-          contact: data.contact ?? 'Sin contacto',
-          preferredChannel: (data.preferredChannel ?? 'chat') as MessagingChannel,
-          stageStatus,
-          createdAt: data.createdAt?.toDate?.().toISOString?.() ?? null,
-          updatedAt: data.updatedAt?.toDate?.().toISOString?.() ?? null
-        } satisfies Patient;
-      });
-      setPatients(docs);
-      setLoading(false);
-    });
+
+        setPatients(docs);
+        setLoading(false);
+      },
+      (err: FirestoreError) => {
+        setError(err.message);
+        setLoading(false);
+      }
+    );
+
     return () => unsubscribe();
   }, []);
 
+  // Mensajes del paciente seleccionado (tiempo real)
   useEffect(() => {
     if (!selectedPatientId) {
       setMessages([]);
       return;
     }
+
+    setError(null);
     const messagesQuery = query(
       collection(db, `${PATIENTS_COLLECTION}/${selectedPatientId}/messages`),
       orderBy('sentAt', 'desc')
     );
-    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-      const docs = snapshot.docs.map((docSnapshot) => {
-        const data = docSnapshot.data();
-        return {
-          id: docSnapshot.id,
-          subject: data.subject ?? '',
-          body: data.body ?? '',
-          channel: (data.channel ?? 'chat') as MessagingChannel,
-          sentAt: data.sentAt?.toDate?.().toISOString?.() ?? new Date().toISOString()
-        } satisfies PatientMessage;
-      });
-      setMessages(docs);
-    });
+
+    const unsubscribe = onSnapshot(
+      messagesQuery,
+      (snapshot) => {
+        const docs = snapshot.docs.map((docSnapshot) => {
+          const data = docSnapshot.data() as any;
+          return {
+            id: docSnapshot.id,
+            subject: data.subject ?? '',
+            body: data.body ?? '',
+            channel: (data.channel ?? 'chat') as MessagingChannel,
+            sentAt: data.sentAt?.toDate?.()?.toISOString?.() ?? new Date().toISOString(),
+          } satisfies PatientMessage;
+        });
+        setMessages(docs);
+      },
+      (err: FirestoreError) => setError(err.message)
+    );
+
     return () => unsubscribe();
   }, [selectedPatientId]);
 
-  const selectedPatient = useMemo(() => patients.find((patient) => patient.id === selectedPatientId) ?? null, [
-    patients,
-    selectedPatientId
-  ]);
+  const selectedPatient = useMemo(
+    () => patients.find((p) => p.id === selectedPatientId) ?? null,
+    [patients, selectedPatientId]
+  );
 
   const selectPatient = useCallback((patientId: string | null) => {
     setSelectedPatientId(patientId);
@@ -89,17 +118,19 @@ export function usePatients(): UsePatientsResult {
     if (!name) return;
     const contact = prompt('Contacto (teléfono, email):') ?? '';
     const preferredChannel = (prompt('Canal preferido (chat/sms):', 'chat') ?? 'chat') as MessagingChannel;
+
     const stageStatus = STAGES.reduce<Record<number, boolean>>((acc, stage) => {
       acc[stage.id] = false;
       return acc;
     }, {});
+
     await addDoc(collection(db, PATIENTS_COLLECTION), {
       name,
       contact,
       preferredChannel,
       stageStatus,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
   }, []);
 
@@ -109,7 +140,7 @@ export function usePatients(): UsePatientsResult {
       const patientRef = doc(db, PATIENTS_COLLECTION, selectedPatientId);
       await updateDoc(patientRef, {
         [`stageStatus.${stageId}`]: value,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     },
     [selectedPatientId]
@@ -118,19 +149,21 @@ export function usePatients(): UsePatientsResult {
   const sendMessage = useCallback(
     async (subject: string, body: string, channel: MessagingChannel) => {
       if (!selectedPatientId) throw new Error('Selecciona un paciente');
+
       const messagesRef = collection(db, `${PATIENTS_COLLECTION}/${selectedPatientId}/messages`);
       await addDoc(messagesRef, {
         subject,
         body,
         channel,
         sentAt: serverTimestamp(),
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
       });
+
       const patientRef = doc(db, PATIENTS_COLLECTION, selectedPatientId);
       await updateDoc(patientRef, {
         lastMessageAt: serverTimestamp(),
         preferredChannel: channel,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     },
     [selectedPatientId]
@@ -139,11 +172,12 @@ export function usePatients(): UsePatientsResult {
   return {
     patients,
     loading,
+    error,
     selectPatient,
     selectedPatient,
     messages,
     addPatient,
     toggleStage,
-    sendMessage
+    sendMessage,
   };
 }
