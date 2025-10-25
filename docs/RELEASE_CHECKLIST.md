@@ -9,3 +9,6 @@
 - Configuración de notificaciones push y certificados vigente
 - API Key y secrets de App Store Connect vigentes en GitHub Actions
 - Roles de equipo en App Store Connect actualizados
+- Screenshots listos
+- PrivacyInfo.xcprivacy revisado
+- Notas de versión preparadas
