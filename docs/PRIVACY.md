@@ -9,3 +9,6 @@
   - Apple Push Notification service (APNs) para enviar alertas sobre respuestas y recordatorios.
   - App Store Connect API para automatizar envíos a TestFlight.
 - Contacto de privacidad: privacidad@clinyco.com
+- Política de privacidad (URL):
+- Datos recolectados por la app:
+- Uso de Zendesk Messaging: adjuntar política del proveedor.

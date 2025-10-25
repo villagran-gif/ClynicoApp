@@ -22,6 +22,9 @@ platform :ios do
     # Si NO usas match, quita esta línea y usa api_key(...) en upload_to_testflight.
     # match(type: "appstore", readonly: false)
 
+  desc "Preparado para TestFlight (activar luego, con firma)"
+  lane :beta do
+    # Requiere certificados/perfiles o match configurado.
     increment_build_number(xcodeproj: "Clinyco.xcodeproj")
     build_app(
       scheme: "Clinyco",
@@ -33,3 +36,4 @@ platform :ios do
     )
   end
 end
+# Se completará en el Paso 2
