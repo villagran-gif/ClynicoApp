@@ -1,0 +1,4 @@
+app_identifier("com.tuempresa.clinyco")    # cámbialo luego si usas otro bundle id
+apple_id("tuappleid@correo.com")            # opcional
+itc_team_id("")                             # opcional (App Store Connect Team ID)
+team_id("")                                 # opcional (Developer Team ID)

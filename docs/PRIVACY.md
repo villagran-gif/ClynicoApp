@@ -1,0 +1,11 @@
+# Privacidad (borrador)
+- Política de privacidad (URL): https://clinyco.com/politica-privacidad
+- Datos recolectados por la app:
+  - Perfil del paciente: nombre, contacto y atributos clínicos necesarios para su atención.
+  - Historial de consultas, notas médicas y archivos adjuntos aportados por el equipo de salud.
+  - Eventos técnicos (logs y métricas de estabilidad) anonimizados para mejorar la app.
+- Uso de Zendesk Messaging: se utiliza para atención a pacientes y soporte interno; la conversación se almacena siguiendo [la política de Zendesk](https://www.zendesk.com/company/agreements-and-terms/privacy-policy/).
+- Integraciones externas:
+  - Apple Push Notification service (APNs) para enviar alertas sobre respuestas y recordatorios.
+  - App Store Connect API para automatizar envíos a TestFlight.
+- Contacto de privacidad: privacidad@clinyco.com
