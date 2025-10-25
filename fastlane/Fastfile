@@ -7,19 +7,20 @@ platform :ios do
     xcodeproj_paths = Dir["*.xcodeproj"]
     if xcodeproj_paths.empty?
       UI.message("No hay .xcodeproj todavía. Build omitido.")
-      next
+      return
     end
 
     build_app(
-      scheme: "Clinyco",               # cuando crees el proyecto, usa este scheme
+      scheme: "Clinyco",        # ajústalo al nombre real de tu scheme cuando exista
       sdk: "iphonesimulator",
       skip_codesign: true
     )
   end
 
-  desc "Preparado para TestFlight (activar luego, con firma)"
+  desc "Build y subir a TestFlight (activar cuando haya firma)"
   lane :beta do
-    # Requiere certificados/perfiles o match configurado.
+    # match(type: "appstore", readonly: false)  # descomenta si usas match
+
     increment_build_number(xcodeproj: "Clinyco.xcodeproj")
     build_app(
       scheme: "Clinyco",
@@ -31,4 +32,3 @@ platform :ios do
     )
   end
 end
-# Se completará en el Paso 2
