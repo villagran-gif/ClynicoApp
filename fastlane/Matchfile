@@ -1,1 +1,5 @@
+# Configurarás match cuando tengas los certificados:
+# git_url("git@github.com:TU-ORG/clinyco-certificates.git")
+# storage_mode("git")
+# type("appstore")
 # Se completará en el Paso 2
