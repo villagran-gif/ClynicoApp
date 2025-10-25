@@ -16,5 +16,29 @@ coverage/
 /data/
 
 # Dependencias del frontend
+node_modules/
 clynico_app/node_modules/
 clynico_app/dist/
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+
+# SwiftPM
+Packages/
+.swiftpm/
+
+# CocoaPods (si lo usas)
+Pods/
+*.xcworkspace
+
+# Fastlane y artefactos
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+
+# Archivos grandes generados
+*.ipa
+*.dSYM.zip
