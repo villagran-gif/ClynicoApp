@@ -1,0 +1,35 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build rápido para CI (simulador, sin firma)"
+  lane :build_ci do
+    # Si aún NO existe el proyecto Xcode, salimos sin fallar.
+    xcodeproj_paths = Dir["*.xcodeproj"]
+    if xcodeproj_paths.empty?
+      UI.message("No hay .xcodeproj todavía. Build omitido.")
+      next
+    end
+
+    build_app(
+      scheme: "Clinyco",               # cuando crees el proyecto, usa este scheme
+      sdk: "iphonesimulator",
+      skip_codesign: true
+    )
+  end
+
+  desc "Build y subir a TestFlight"
+  lane :beta do
+    # Si NO usas match, quita esta línea y usa api_key(...) en upload_to_testflight.
+    # match(type: "appstore", readonly: false)
+
+    increment_build_number(xcodeproj: "Clinyco.xcodeproj")
+    build_app(
+      scheme: "Clinyco",
+      export_method: "app-store"
+    )
+    upload_to_testflight(
+      distribute_external: false,
+      changelog: ENV["CHANGELOG"] || "Build automático"
+    )
+  end
+end
