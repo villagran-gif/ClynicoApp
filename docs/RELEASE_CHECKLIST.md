@@ -1,6 +1,7 @@
 # Checklist de release (borrador)
 - Compilación CI OK
 - Screenshots listos en todos los tamaños requeridos
+- PrivacyInfo.xcprivacy revisado y actualizado, con secciones de tracking al día
 - PrivacyInfo.xcprivacy revisado y actualizado
 - Notas de versión preparadas y revisadas por el equipo médico
 - Política de privacidad y términos legales validados
@@ -9,6 +10,7 @@
 - Configuración de notificaciones push y certificados vigente
 - API Key y secrets de App Store Connect vigentes en GitHub Actions
 - Roles de equipo en App Store Connect actualizados
+- Revisión de accesibilidad (VoiceOver, Dynamic Type, colores) documentada
 - Screenshots listos
 - PrivacyInfo.xcprivacy revisado
 - Notas de versión preparadas

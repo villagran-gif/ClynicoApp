@@ -17,6 +17,11 @@ platform :ios do
     )
   end
 
+  desc "Build y subir a TestFlight"
+  lane :beta do
+    # Si NO usas match, quita esta línea y usa api_key(...) en upload_to_testflight.
+    # match(type: "appstore", readonly: false)
+
   desc "Preparado para TestFlight (activar luego, con firma)"
   lane :beta do
     # Requiere certificados/perfiles o match configurado.
